@@ -23,11 +23,10 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(app)
 
 # ─── S3 Config ─────────────────────────────────────────────────
+# No keys needed here — boto3 automatically uses the EC2 IAM Role
 s3_client = boto3.client(
     's3',
     region_name=os.getenv('AWS_REGION', 'us-east-1'),
-    aws_access_key_id=os.getenv('AWS_ACCESS_KEY_ID'),
-    aws_secret_access_key=os.getenv('AWS_SECRET_ACCESS_KEY')
 )
 S3_BUCKET = os.getenv('S3_BUCKET_NAME')
 
