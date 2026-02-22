@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>ClientVault — Registration Portal</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
+<style>
+  :root {
+    --bg:#0c0f14;--surface:#141820;--card:#1a2030;
+    --accent:#e8ff47;--accent2:#47c2ff;
+    --text:#f0f2f5;--muted:#6b7485;--border:#252d3d;
+    --success:#2dcc70;--error:#ff4757;--radius:14px;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min-height:100vh;display:flex;flex-direction:column;align-items:center;padding:40px 20px 80px;background-image:radial-gradient(ellipse 60% 40% at 80% 10%,rgba(232,255,71,.06) 0%,transparent 60%),radial-gradient(ellipse 50% 40% at 10% 80%,rgba(71,194,255,.06) 0%,transparent 60%)}
+  header{width:100%;max-width:680px;margin-bottom:48px;display:flex;align-items:center;gap:16px}
+  .logo-mark{width:44px;height:44px;background:var(--accent);border-radius:10px;display:grid;place-items:center}
+  .logo-mark svg{width:22px;height:22px}
+  .brand h1{font-family:'Syne',sans-serif;font-size:1.4rem;font-weight:800;letter-spacing:-.5px}
+  .brand p{font-size:.8rem;color:var(--muted);margin-top:1px}
+  .steps{width:100%;max-width:680px;display:flex;align-items:center;margin-bottom:36px}
+  .step{display:flex;align-items:center;gap:10px;flex:1;position:relative}
+  .step:not(:last-child)::after{content:'';position:absolute;left:34px;right:0;top:12px;height:2px;background:var(--border);z-index:0}
+  .step.done:not(:last-child)::after{background:var(--accent)}
+  .step-num{width:24px;height:24px;border-radius:50%;border:2px solid var(--border);display:grid;place-items:center;font-size:.7rem;font-weight:700;color:var(--muted);background:var(--bg);position:relative;z-index:1;transition:all .3s;flex-shrink:0}
+  .step.active .step-num{border-color:var(--accent);color:var(--bg);background:var(--accent)}
+  .step.done .step-num{border-color:var(--accent);background:var(--accent);color:var(--bg)}
+  .step-label{font-size:.75rem;color:var(--muted);white-space:nowrap}
+  .step.active .step-label,.step.done .step-label{color:var(--text)}
+  .card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);width:100%;max-width:680px;padding:40px;position:relative;overflow:hidden}
+  .card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--accent),var(--accent2))}
+  .section-tag{display:inline-flex;align-items:center;gap:6px;background:rgba(232,255,71,.1);border:1px solid rgba(232,255,71,.2);color:var(--accent);font-size:.7rem;font-weight:700;letter-spacing:1px;text-transform:uppercase;padding:4px 10px;border-radius:40px;margin-bottom:20px}
+  .section-title{font-family:'Syne',sans-serif;font-size:1.5rem;font-weight:800;margin-bottom:6px}
+  .section-sub{font-size:.88rem;color:var(--muted);margin-bottom:32px}
+  .form-page{display:none;animation:fadeIn .3s ease}
+  .form-page.active{display:block}
+  @keyframes fadeIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+  .form-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+  .form-group{display:flex;flex-direction:column;gap:8px}
+  .form-group.full{grid-column:1/-1}
+  label{font-size:.8rem;font-weight:500;color:#a0abb8;letter-spacing:.3px}
+  input,textarea,select{background:var(--surface);border:1.5px solid var(--border);border-radius:10px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:.92rem;padding:13px 16px;transition:border-color .2s,box-shadow .2s;outline:none;width:100%}
+  input:focus,textarea:focus,select:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(232,255,71,.1)}
+  input::placeholder,textarea::placeholder{color:var(--muted)}
+  textarea{resize:vertical;min-height:100px}
+  select option{background:var(--surface)}
+  .upload-zone{border:2px dashed var(--border);border-radius:var(--radius);padding:40px 20px;text-align:center;cursor:pointer;transition:all .25s;position:relative;background:var(--surface)}
+  .upload-zone:hover,.upload-zone.dragover{border-color:var(--accent);background:rgba(232,255,71,.04)}
+  .upload-zone input[type="file"]{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%;padding:0;border:none;background:none}
+  .upload-icon{width:52px;height:52px;background:rgba(232,255,71,.1);border-radius:12px;display:grid;place-items:center;margin:0 auto 14px}
+  .upload-icon svg{width:26px;height:26px;stroke:var(--accent)}
+  .upload-zone h4{font-size:.95rem;font-weight:600;margin-bottom:4px}
+  .upload-zone p{font-size:.8rem;color:var(--muted)}
+  .s3-badge{display:inline-flex;align-items:center;gap:5px;background:rgba(71,194,255,.1);border:1px solid rgba(71,194,255,.2);color:var(--accent2);font-size:.68rem;font-weight:700;letter-spacing:.5px;text-transform:uppercase;padding:3px 8px;border-radius:40px;margin-top:12px}
+  .previews{display:flex;flex-wrap:wrap;gap:10px;margin-top:16px}
+  .preview-item{position:relative;width:80px;height:80px;border-radius:8px;overflow:hidden;border:1.5px solid var(--border)}
+  .preview-item img{width:100%;height:100%;object-fit:cover}
+  .remove-btn{position:absolute;top:3px;right:3px;background:rgba(0,0,0,.7);border:none;border-radius:50%;width:18px;height:18px;display:grid;place-items:center;cursor:pointer;color:white;font-size:10px}
+  .review-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:24px}
+  .review-item{background:var(--surface);border-radius:10px;padding:14px 16px}
+  .review-item.full{grid-column:1/-1}
+  .review-label{font-size:.72rem;color:var(--muted);margin-bottom:4px;text-transform:uppercase;letter-spacing:.5px}
+  .review-value{font-size:.92rem;font-weight:500}
+  .btn-row{display:flex;justify-content:space-between;align-items:center;margin-top:32px;gap:12px}
+  .btn{font-family:'DM Sans',sans-serif;font-size:.9rem;font-weight:600;padding:13px 28px;border-radius:10px;border:none;cursor:pointer;transition:all .2s;display:inline-flex;align-items:center;gap:8px}
+  .btn-primary{background:var(--accent);color:var(--bg)}
+  .btn-primary:hover{background:#d4eb30;transform:translateY(-1px);box-shadow:0 8px 20px rgba(232,255,71,.25)}
+  .btn-secondary{background:transparent;color:var(--text);border:1.5px solid var(--border)}
+  .btn-secondary:hover{border-color:var(--text)}
+  .btn:disabled{opacity:.5;cursor:not-allowed;transform:none!important}
+  .success-screen{display:none;text-align:center;padding:20px 0}
+  .success-screen.active{display:block;animation:fadeIn .5s ease}
+  .success-icon{width:72px;height:72px;background:rgba(45,204,112,.15);border-radius:50%;display:grid;place-items:center;margin:0 auto 24px;border:2px solid rgba(45,204,112,.3)}
+  .success-icon svg{width:36px;height:36px;stroke:var(--success)}
+  .success-id{background:var(--surface);border-radius:10px;padding:14px 24px;display:inline-block;margin:20px 0;font-family:'Syne',sans-serif;font-size:1.2rem;color:var(--accent);letter-spacing:2px}
+  #toast{position:fixed;bottom:30px;right:30px;background:var(--error);color:#fff;padding:14px 20px;border-radius:10px;font-size:.88rem;opacity:0;transform:translateY(10px);transition:all .3s;pointer-events:none;z-index:999}
+  #toast.show{opacity:1;transform:translateY(0)}
+  .spinner{width:18px;height:18px;border:2px solid rgba(0,0,0,.2);border-top-color:var(--bg);border-radius:50%;animation:spin .7s linear infinite;display:none}
+  @keyframes spin{to{transform:rotate(360deg)}}
+  .progress-bar{width:100%;height:4px;background:var(--border);border-radius:2px;margin-top:16px;overflow:hidden;display:none}
+  .progress-fill{height:100%;background:var(--accent);width:0%;transition:width .3s}
+  @media(max-width:540px){.card{padding:24px 20px}.form-grid{grid-template-columns:1fr}.review-grid{grid-template-columns:1fr}.steps{display:none}}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo-mark">
+    <svg viewBox="0 0 24 24" fill="none" stroke="#0c0f14" stroke-width="2.5" stroke-linecap="round"><path d="M20 7H4a2 2 0 00-2 2v10a2 2 0 002 2h16a2 2 0 002-2V9a2 2 0 00-2-2z"/><path d="M16 3H8a2 2 0 00-2 2v2h12V5a2 2 0 00-2-2z"/></svg>
+  </div>
+  <div class="brand">
+    <h1>ClientVault</h1>
+    <p>Client Registration Portal — Flask + MySQL + S3</p>
+  </div>
+</header>
+
+<div class="steps" id="steps">
+  <div class="step active" id="step1"><span class="step-num">1</span><span class="step-label">Personal Info</span></div>
+  <div class="step" id="step2"><span class="step-num">2</span><span class="step-label">Address</span></div>
+  <div class="step" id="step3"><span class="step-num">3</span><span class="step-label">Documents</span></div>
+  <div class="step" id="step4"><span class="step-num">4</span><span class="step-label">Review</span></div>
+</div>
+
+<div class="card">
+
+  <!-- Page 1 -->
+  <div class="form-page active" id="page1">
+    <div class="section-tag">● Step 1 of 4</div>
+    <div class="section-title">Personal Information</div>
+    <div class="section-sub">Enter the client's basic details.</div>
+    <div class="form-grid">
+      <div class="form-group"><label>First Name *</label><input id="firstName" placeholder="John"/></div>
+      <div class="form-group"><label>Last Name *</label><input id="lastName" placeholder="Doe"/></div>
+      <div class="form-group"><label>Client ID *</label><input id="clientId" placeholder="CLT-00123"/></div>
+      <div class="form-group"><label>Date of Birth</label><input type="date" id="dob"/></div>
+      <div class="form-group"><label>Email *</label><input type="email" id="email" placeholder="john@example.com"/></div>
+      <div class="form-group"><label>Phone</label><input type="tel" id="phone" placeholder="+234 800 000 0000"/></div>
+    </div>
+    <div class="btn-row"><span></span><button class="btn btn-primary" onclick="goTo(2)">Continue →</button></div>
+  </div>
+
+  <!-- Page 2 -->
+  <div class="form-page" id="page2">
+    <div class="section-tag">● Step 2 of 4</div>
+    <div class="section-title">Address Details</div>
+    <div class="section-sub">Provide the client's physical address.</div>
+    <div class="form-grid">
+      <div class="form-group full"><label>Street Address *</label><input id="street" placeholder="123 Victoria Island"/></div>
+      <div class="form-group"><label>City *</label><input id="city" placeholder="Lagos"/></div>
+      <div class="form-group"><label>State *</label><input id="state" placeholder="Lagos State"/></div>
+      <div class="form-group"><label>ZIP / Postal Code</label><input id="zip" placeholder="100001"/></div>
+      <div class="form-group"><label>Country *</label>
+        <select id="country">
+          <option value="">Select country</option>
+          <option value="NG" selected>Nigeria</option>
+          <option value="GH">Ghana</option>
+          <option value="KE">Kenya</option>
+          <option value="ZA">South Africa</option>
+          <option value="US">United States</option>
+          <option value="GB">United Kingdom</option>
+          <option value="Other">Other</option>
+        </select>
+      </div>
+      <div class="form-group full"><label>Notes</label><textarea id="notes" placeholder="Landmarks, extra info..."></textarea></div>
+    </div>
+    <div class="btn-row"><button class="btn btn-secondary" onclick="goTo(1)">← Back</button><button class="btn btn-primary" onclick="goTo(3)">Continue →</button></div>
+  </div>
+
+  <!-- Page 3 -->
+  <div class="form-page" id="page3">
+    <div class="section-tag">● Step 3 of 4</div>
+    <div class="section-title">Documents & Pictures</div>
+    <div class="section-sub">Upload photos or ID documents. Stored directly in your AWS S3 bucket.</div>
+    <div class="upload-zone" id="uploadZone">
+      <input type="file" id="fileInput" multiple accept="image/*,.pdf" onchange="handleFiles(this.files)"/>
+      <div class="upload-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/>
+        </svg>
+      </div>
+      <h4>Drop files here or click to browse</h4>
+      <p>JPG, PNG, PDF · Max 10MB per file</p>
+      <span class="s3-badge">☁ Uploads to AWS S3</span>
+    </div>
+    <div class="progress-bar" id="progressBar"><div class="progress-fill" id="progressFill"></div></div>
+    <div class="previews" id="previews"></div>
+    <div class="btn-row"><button class="btn btn-secondary" onclick="goTo(2)">← Back</button><button class="btn btn-primary" onclick="goTo(4)">Review →</button></div>
+  </div>
+
+  <!-- Page 4 -->
+  <div class="form-page" id="page4">
+    <div class="section-tag">● Step 4 of 4</div>
+    <div class="section-title">Review & Submit</div>
+    <div class="section-sub">Check everything before saving to the database.</div>
+    <div class="review-grid" id="reviewGrid"></div>
+    <div class="btn-row">
+      <button class="btn btn-secondary" onclick="goTo(3)">← Back</button>
+      <button class="btn btn-primary" id="submitBtn" onclick="submitForm()">
+        <span id="submitText">Submit Client</span>
+        <div class="spinner" id="spinner"></div>
+      </button>
+    </div>
+  </div>
+
+  <!-- Success -->
+  <div class="success-screen" id="successScreen">
+    <div class="success-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div>
+    <h2 style="font-family:'Syne',sans-serif;font-size:1.6rem;font-weight:800;">Client Registered!</h2>
+    <p style="color:var(--muted);margin-top:8px">Saved to MySQL · Photos in S3</p>
+    <div class="success-id" id="successId">CLT-000000</div>
+    <button class="btn btn-primary" style="margin-top:28px" onclick="resetForm()">Register Another</button>
+  </div>
+
+</div>
+
+<div id="toast"></div>
+
+<script>
+  let currentPage = 1;
+  let uploadedFiles = [];
+
+  function goTo(page) {
+    if (!validate(currentPage)) return;
+    document.getElementById(`page${currentPage}`).classList.remove('active');
+    document.querySelectorAll('.step').forEach((s,i) => {
+      s.classList.remove('active');
+      if (i+1 < page) s.classList.add('done'); else s.classList.remove('done');
+    });
+    currentPage = page;
+    document.getElementById(`page${currentPage}`).classList.add('active');
+    document.getElementById(`step${currentPage}`).classList.add('active');
+    if (page === 4) buildReview();
+    window.scrollTo({top:0,behavior:'smooth'});
+  }
+
+  function validate(page) {
+    const rules = {
+      1: [{id:'firstName',msg:'First name required'},{id:'lastName',msg:'Last name required'},{id:'clientId',msg:'Client ID required'},{id:'email',msg:'Valid email required',check:v=>/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v)}],
+      2: [{id:'street',msg:'Street required'},{id:'city',msg:'City required'},{id:'state',msg:'State required'},{id:'country',msg:'Country required'}],
+      3:[], 4:[]
+    };
+    for (const r of (rules[page]||[])) {
+      const el = document.getElementById(r.id);
+      const val = el?.value.trim()||'';
+      if (r.check ? !r.check(val) : !val) { showToast(r.msg); el?.focus(); return false; }
+    }
+    return true;
+  }
+
+  function handleFiles(files) {
+    for (const f of files) {
+      if (f.size > 10*1024*1024) { showToast(`${f.name} > 10MB`); continue; }
+      uploadedFiles.push(f);
+      if (f.type.startsWith('image/')) {
+        const r = new FileReader();
+        r.onload = e => addPreview(e.target.result, uploadedFiles.length-1);
+        r.readAsDataURL(f);
+      } else { addPreview(null, uploadedFiles.length-1, f.name); }
+    }
+  }
+
+  function addPreview(src, idx, name) {
+    const d = document.createElement('div');
+    d.className='preview-item'; d.id=`preview_${idx}`;
+    d.innerHTML = src ? `<img src="${src}"/>` : `<div style="width:100%;height:100%;display:grid;place-items:center;font-size:.6rem;color:var(--muted);padding:4px;text-align:center">${name}</div>`;
+    d.innerHTML += `<button class="remove-btn" onclick="removeFile(${idx})">✕</button>`;
+    document.getElementById('previews').appendChild(d);
+  }
+
+  function removeFile(idx) { uploadedFiles.splice(idx,1); document.getElementById(`preview_${idx}`)?.remove(); }
+
+  function buildReview() {
+    const fields = [
+      {l:'First Name',v:g('firstName')},{l:'Last Name',v:g('lastName')},
+      {l:'Client ID',v:g('clientId')},{l:'Date of Birth',v:g('dob')||'—'},
+      {l:'Email',v:g('email'),full:true},{l:'Phone',v:g('phone')||'—'},
+      {l:'Street',v:g('street'),full:true},{l:'City',v:g('city')},
+      {l:'State',v:g('state')},{l:'Country',v:g('country')},
+      {l:'Files',v:uploadedFiles.length?`${uploadedFiles.length} file(s) → S3`:'None'},
+      {l:'Notes',v:g('notes')||'—',full:true},
+    ];
+    document.getElementById('reviewGrid').innerHTML = fields.map(f=>
+      `<div class="review-item ${f.full?'full':''}"><div class="review-label">${f.l}</div><div class="review-value">${f.v}</div></div>`
+    ).join('');
+  }
+
+  function g(id){return document.getElementById(id)?.value.trim()||'';}
+
+  async function submitForm() {
+    const btn=document.getElementById('submitBtn');
+    const spinner=document.getElementById('spinner');
+    const text=document.getElementById('submitText');
+    btn.disabled=true; spinner.style.display='block'; text.textContent='Uploading files...';
+
+    try {
+      // 1. Upload each file to S3 via presigned URL from our Flask backend
+      const uploadedKeys = [];
+      const progressBar = document.getElementById('progressBar');
+      const progressFill = document.getElementById('progressFill');
+      progressBar.style.display = 'block';
+
+      for (let i = 0; i < uploadedFiles.length; i++) {
+        const file = uploadedFiles[i];
+        progressFill.style.width = `${Math.round((i/uploadedFiles.length)*50)}%`;
+
+        const urlRes = await fetch('/api/get-upload-url', {
+          method: 'POST',
+          headers: {'Content-Type':'application/json'},
+          body: JSON.stringify({fileName:file.name, fileType:file.type, clientId:g('clientId')})
+        });
+        const {uploadUrl, key} = await urlRes.json();
+
+        await fetch(uploadUrl, {method:'PUT', body:file, headers:{'Content-Type':file.type}});
+        uploadedKeys.push({key, fileName:file.name, fileType:file.type});
+        progressFill.style.width = `${Math.round(((i+1)/uploadedFiles.length)*50)}%`;
+      }
+
+      text.textContent = 'Saving to database...';
+      progressFill.style.width = '75%';
+
+      // 2. POST client data to Flask → MySQL
+      const res = await fetch('/api/clients', {
+        method: 'POST',
+        headers: {'Content-Type':'application/json'},
+        body: JSON.stringify({
+          clientId:   g('clientId'),
+          firstName:  g('firstName'),
+          lastName:   g('lastName'),
+          email:      g('email'),
+          phone:      g('phone'),
+          dob:        g('dob'),
+          address: {street:g('street'),city:g('city'),state:g('state'),zip:g('zip'),country:g('country')},
+          notes:      g('notes'),
+          pictures:   uploadedKeys,
+        })
+      });
+
+      progressFill.style.width = '100%';
+      if (!res.ok) { const err = await res.json(); throw new Error(err.error||'Server error'); }
+      const result = await res.json();
+
+      setTimeout(()=>{ progressBar.style.display='none'; showSuccess(result.clientId); },400);
+
+    } catch(err) {
+      showToast(err.message || 'Submission failed');
+      btn.disabled=false; spinner.style.display='none'; text.textContent='Submit Client';
+    }
+  }
+
+  function showSuccess(id) {
+    document.querySelectorAll('.form-page').forEach(p=>p.classList.remove('active'));
+    document.getElementById('steps').style.opacity='0.3';
+    document.getElementById('successId').textContent=id;
+    document.getElementById('successScreen').classList.add('active');
+  }
+
+  function resetForm() {
+    document.querySelectorAll('input,textarea,select').forEach(el=>el.value='');
+    uploadedFiles=[];
+    document.getElementById('previews').innerHTML='';
+    document.getElementById('successScreen').classList.remove('active');
+    document.getElementById('steps').style.opacity='1';
+    currentPage=1;
+    document.querySelectorAll('.step').forEach(s=>{s.classList.remove('active','done');});
+    document.getElementById('step1').classList.add('active');
+    document.getElementById('page1').classList.add('active');
+  }
+
+  function showToast(msg) {
+    const t=document.getElementById('toast');
+    t.textContent=msg; t.classList.add('show');
+    setTimeout(()=>t.classList.remove('show'),3500);
+  }
+
+  const zone=document.getElementById('uploadZone');
+  zone.addEventListener('dragover',e=>{e.preventDefault();zone.classList.add('dragover')});
+  zone.addEventListener('dragleave',()=>zone.classList.remove('dragover'));
+  zone.addEventListener('drop',e=>{e.preventDefault();zone.classList.remove('dragover');handleFiles(e.dataTransfer.files)});
+</script>
+</body>
+</html>
